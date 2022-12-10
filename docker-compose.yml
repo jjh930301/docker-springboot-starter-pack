@@ -1,0 +1,37 @@
+version: "3"
+services:
+  spring:
+    build:
+      context: ./spring
+      dockerfile: Dockerfile
+    container_name: spring
+    env_file: .env
+    environment:
+      - ENV=development
+    restart: always
+    volumes:
+      - "./spring:/usr/src/spring"
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql # mysql이 실행되고 spring container가 실행됩니다.
+  mysql:
+    # platform: linux/amd64 # m1칩일 경우
+    image: "mysql:8.0.21"
+    logging:
+      driver: none
+    restart: always
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    env_file:
+      - ./.env
+    volumes:
+      - ./mysql/conf.d:/etc/mysql/conf.d
+      - ./mysql/data:/var/lib//mysql # mysql/data에 데이터를 담을 때 사용 합니다.
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d #intidb.d의 create.sql을 실행
+    environment:
+      MYSQL_DATABASE: SPRING
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
